@@ -30,8 +30,9 @@ class SlidingEightPuzzle(tk.Tk):
             button.grid(row=i // 3, column=i % 3)
             self.grid_frames.append(button)
         self.timer_label = tk.Label(self, text="00:00:00")
-        self.moves_label = tk.Label(self, text="0")
         self.timer_label.grid(row=3, column=0, columnspan=3)
+        self.moves_label = tk.Label(self, text="Moves: ")
+        self.moves_label.grid(row=4, column=0, columnspan=3)
 
     def init_timer(self):
         self.elapsed_time = 0
@@ -56,6 +57,7 @@ class SlidingEightPuzzle(tk.Tk):
     def update_move_counter(self):
         if self.timer_started:
             self.moves += 1
+            self.moves_label.config(text="Moves: " + str(self.moves))
     def move_tile(self, index):
         self.start_timer()
         if self.is_valid_move(index):
@@ -64,8 +66,6 @@ class SlidingEightPuzzle(tk.Tk):
             self.update_move_counter()
             self.refresh_board()
             self.is_winner()
-
-
 
     def is_valid_move(self, index):
         row_diff = abs(index // 3 - self.empty_tile_index // 3)
