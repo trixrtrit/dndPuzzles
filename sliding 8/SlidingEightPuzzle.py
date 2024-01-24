@@ -1,7 +1,9 @@
 import time
 import tkinter as tk
 from tkinter import messagebox
+from PIL import Image, ImageTk
 import random
+import ProcessImage as procImg
 
 
 class SlidingEightPuzzle(tk.Tk):
@@ -19,16 +21,34 @@ class SlidingEightPuzzle(tk.Tk):
         self.timer_started = False
         self.start_time = 0
         self.moves = 0
+        self.image_path = './owl.png'
+        self.img_tiles = procImg.process_image(self.image_path)
+        self.geometry("800x800")
         self.init_ui()
         self.init_timer()
 
     def init_ui(self):
+        self.tile_frames = []
+        self.tile_labels = []
+        self.tk_img_tiles = [ImageTk.PhotoImage(image=tile) for tile in self.img_tiles]
+        tile_size = (100, 100)
+
         for i in range(len(self.tiles)):
-            tile = self.tiles[i]
-            button = tk.Button(self, text=str(tile) if tile != 0 else "",
-                               width=10, height=5, command=lambda tile_pos=i: self.move_tile(tile_pos))
-            button.grid(row=i // 3, column=i % 3)
-            self.grid_frames.append(button)
+            frame = tk.Frame(self, width=tile_size[0], height=tile_size[1])
+            frame.grid(row=i // 3, column=i % 3)
+            frame.grid_propagate(False)
+            frame.grid_columnconfigure(0, weight=1)
+            frame.grid_rowconfigure(0, weight=1)
+
+            if self.tiles[i] != 0:
+                label = tk.Label(frame, image=self.tk_img_tiles[self.tiles[i] - 1])
+            else:
+                label = tk.Label(frame, background='black')  # Empty tile
+            label.grid(sticky="nsew")
+            label.bind("<Button-1>", lambda event, tile_pos=i: self.move_tile(tile_pos))
+
+            self.tile_frames.append(frame)
+            self.tile_labels.append(label)
         self.timer_label = tk.Label(self, text="00:00:00")
         self.timer_label.grid(row=3, column=0, columnspan=3)
         self.moves_label = tk.Label(self, text="Moves: ")
@@ -58,6 +78,7 @@ class SlidingEightPuzzle(tk.Tk):
         if self.timer_started:
             self.moves += 1
             self.moves_label.config(text="Moves: " + str(self.moves))
+
     def move_tile(self, index):
         self.start_timer()
         if self.is_valid_move(index):
@@ -73,8 +94,11 @@ class SlidingEightPuzzle(tk.Tk):
         return (row_diff == 1 and col_diff == 0) or (row_diff == 0 and col_diff == 1)
 
     def refresh_board(self):
-        for i, tile in enumerate(self.tiles):
-            self.grid_frames[i].config(text=str(tile) if tile != 0 else "")
+        for i, tile_index in enumerate(self.tiles):
+            if tile_index != 0:
+                self.tile_labels[i].config(image=self.tk_img_tiles[tile_index - 1])
+            else:
+                self.tile_labels[i].config(image='', background='black')
 
     def is_winner(self):
         if self.tiles == self.winning_condition:
@@ -97,7 +121,6 @@ class SlidingEightPuzzle(tk.Tk):
 
     def is_solvable(self, tiles):
         return self.count_inversions(tiles) % 2 == 0
-
 
 
 if __name__ == "__main__":
