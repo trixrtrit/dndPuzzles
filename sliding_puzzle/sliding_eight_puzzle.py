@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import ImageTk
 import random
-import ProcessImage as procImg
-import ListImages
+import sliding_puzzle.ProcessImage as procImg
+import sliding_puzzle.ListImages as listImgs
 
 
 class SlidingEightPuzzle(tk.Tk):
@@ -14,7 +14,7 @@ class SlidingEightPuzzle(tk.Tk):
         self.difficulty = difficulty
         self.grid_size = difficulty * difficulty
         if image_path is None:
-            self.image_files = ListImages.list_images('./symbols')
+            self.image_files = listImgs.list_images('./symbols')
             self.wins_needed = len(self.image_files)
         else:
             self.image_files = [image_path]

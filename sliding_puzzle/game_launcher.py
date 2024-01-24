@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from sliding_eight_puzzle import SlidingEightPuzzle
+from sliding_puzzle.sliding_eight_puzzle import SlidingEightPuzzle
 import shutil
 
 
@@ -30,7 +30,3 @@ class GameLauncher(tk.Tk):
         else:
             messagebox.showinfo("No Image Selected", "Please select an image to use for the puzzle.")
 
-
-if __name__ == '__main__':
-    launcher = GameLauncher()
-    launcher.mainloop()
