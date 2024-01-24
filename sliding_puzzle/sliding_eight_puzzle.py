@@ -48,7 +48,8 @@ class SlidingEightPuzzle(tk.Tk):
         for widget in self.winfo_children():
             widget.destroy()
 
-        tk.Button(self, text="Reset", command=lambda: self.reset_game()).grid(row=self.difficulty + 2, column=0, columnspan=3)
+        tk.Button(self, text="Reset", command=lambda: self.reset_game()).grid(row=self.difficulty + 2, column=0,
+                                                                              columnspan=3)
         self.tile_frames = []
         self.tile_labels = []
         self.tk_img_tiles = [ImageTk.PhotoImage(image=tile) for tile in self.img_tiles]
