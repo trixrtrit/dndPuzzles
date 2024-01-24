@@ -1,7 +1,7 @@
 from PIL import Image
 
 
-def process_image(image_path, grid_size=(3, 3), tile_size=(100, 100)):
+def process_image(image_path, grid_size, tile_size=(100, 100)):
     im = Image.open(image_path)
     image_width, image_height = im.size
 

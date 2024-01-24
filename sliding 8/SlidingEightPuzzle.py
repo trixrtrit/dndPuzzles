@@ -7,22 +7,23 @@ import ProcessImage as procImg
 
 
 class SlidingEightPuzzle(tk.Tk):
-    def __init__(self):
+    def __init__(self, difficulty=3):
         super().__init__()
         self.title("Sliding Eight Puzzle")
-        self.winning_condition = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-        self.tiles = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+        self.difficulty = difficulty
+        self.grid_size = difficulty * difficulty
+        self.tiles = [i for i in range(1, self.grid_size)] + [0]
+        self.winning_condition = self.tiles[:]
         random.shuffle(self.tiles)
-        if not self.is_solvable(self.tiles):
-            while not self.is_solvable(self.tiles):
-                random.shuffle(self.tiles)
+        while not self.is_solvable(self.tiles):
+            random.shuffle(self.tiles)
         self.grid_frames = []
         self.empty_tile_index = self.tiles.index(0)
         self.timer_started = False
         self.start_time = 0
         self.moves = 0
-        self.image_path = './owl.png'
-        self.img_tiles = procImg.process_image(self.image_path)
+        self.image_path = 'symbols/owl.png'
+        self.img_tiles = procImg.process_image(self.image_path, grid_size=(self.difficulty, self.difficulty))
         self.geometry("800x800")
         self.init_ui()
         self.init_timer()
@@ -33,9 +34,9 @@ class SlidingEightPuzzle(tk.Tk):
         self.tk_img_tiles = [ImageTk.PhotoImage(image=tile) for tile in self.img_tiles]
         tile_size = (100, 100)
 
-        for i in range(len(self.tiles)):
+        for i in range(self.grid_size):
             frame = tk.Frame(self, width=tile_size[0], height=tile_size[1])
-            frame.grid(row=i // 3, column=i % 3)
+            frame.grid(row=i // self.difficulty, column=i % self.difficulty)
             frame.grid_propagate(False)
             frame.grid_columnconfigure(0, weight=1)
             frame.grid_rowconfigure(0, weight=1)
@@ -50,9 +51,9 @@ class SlidingEightPuzzle(tk.Tk):
             self.tile_frames.append(frame)
             self.tile_labels.append(label)
         self.timer_label = tk.Label(self, text="00:00:00")
-        self.timer_label.grid(row=3, column=0, columnspan=3)
+        self.timer_label.grid(row=self.difficulty, column=0, columnspan=3)
         self.moves_label = tk.Label(self, text="Moves: ")
-        self.moves_label.grid(row=4, column=0, columnspan=3)
+        self.moves_label.grid(row=self.difficulty + 1, column=0, columnspan=3)
 
     def init_timer(self):
         self.elapsed_time = 0
@@ -89,8 +90,8 @@ class SlidingEightPuzzle(tk.Tk):
             self.is_winner()
 
     def is_valid_move(self, index):
-        row_diff = abs(index // 3 - self.empty_tile_index // 3)
-        col_diff = abs(index % 3 - self.empty_tile_index % 3)
+        row_diff = abs(index // self.difficulty - self.empty_tile_index // self.difficulty)
+        col_diff = abs(index % self.difficulty - self.empty_tile_index % self.difficulty)
         return (row_diff == 1 and col_diff == 0) or (row_diff == 0 and col_diff == 1)
 
     def refresh_board(self):
@@ -120,9 +121,22 @@ class SlidingEightPuzzle(tk.Tk):
         return inv_count
 
     def is_solvable(self, tiles):
-        return self.count_inversions(tiles) % 2 == 0
+        if self.difficulty == 3:
+            return self.count_inversions(tiles) % 2 == 0
+        else:
+            inversions = self.count_inversions(tiles)
+            empty_tile_row = self.find_empty_tile_row(tiles, self.grid_size)
+            if (empty_tile_row % 2 == 0 and inversions % 2 != 0) or (empty_tile_row % 2 != 0 and inversions % 2 == 0):
+                return True
+            return False
+
+    def find_empty_tile_row(self, tiles, grid_size):
+        empty_tile_index = tiles.index(0)
+        row_from_top = empty_tile_index // grid_size
+        row_from_bottom = grid_size - row_from_top - 1
+        return row_from_bottom
 
 
 if __name__ == "__main__":
-    game = SlidingEightPuzzle()
+    game = SlidingEightPuzzle(difficulty=4)
     game.mainloop()
