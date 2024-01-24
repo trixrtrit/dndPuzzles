@@ -1,21 +1,25 @@
 import time
 import tkinter as tk
 from tkinter import messagebox
-from PIL import Image, ImageTk
+from PIL import ImageTk
 import random
 import ProcessImage as procImg
 import ListImages
 
 
 class SlidingEightPuzzle(tk.Tk):
-    def __init__(self, difficulty=3):
+    def __init__(self, difficulty=3, image_path=None):
         super().__init__()
         self.title("Sliding Eight Puzzle")
         self.difficulty = difficulty
         self.grid_size = difficulty * difficulty
-        self.image_files = ListImages.list_images('./symbols')
+        if image_path is None:
+            self.image_files = ListImages.list_images('./symbols')
+            self.wins_needed = len(self.image_files)
+        else:
+            self.image_files = [image_path]
+            self.wins_needed = 1
         self.current_image_index = 0
-        self.wins_needed = len(self.image_files)
         self.current_wins = 0
         self.grid_frames = []
         self.geometry("800x800")
@@ -161,8 +165,3 @@ class SlidingEightPuzzle(tk.Tk):
         row_from_top = empty_tile_index // grid_size
         row_from_bottom = grid_size - row_from_top - 1
         return row_from_bottom
-
-
-if __name__ == "__main__":
-    game = SlidingEightPuzzle(difficulty=3)
-    game.mainloop()
