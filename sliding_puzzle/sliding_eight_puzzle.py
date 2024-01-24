@@ -23,6 +23,7 @@ class SlidingEightPuzzle(tk.Tk):
         self.current_wins = 0
         self.grid_frames = []
         self.geometry("800x800")
+        self.starting_state = None
         self.setup_game()
 
     def setup_game(self):
@@ -31,6 +32,7 @@ class SlidingEightPuzzle(tk.Tk):
         random.shuffle(self.tiles)
         while not self.is_solvable(self.tiles):
             random.shuffle(self.tiles)
+        self.starting_state = self.tiles[:]
         self.empty_tile_index = self.tiles.index(0)
         self.img_tiles = procImg.process_image(
             self.image_files[self.current_image_index],
@@ -46,6 +48,7 @@ class SlidingEightPuzzle(tk.Tk):
         for widget in self.winfo_children():
             widget.destroy()
 
+        tk.Button(self, text="Reset", command=lambda: self.reset_game()).grid(row=self.difficulty + 2, column=0, columnspan=3)
         self.tile_frames = []
         self.tile_labels = []
         self.tk_img_tiles = [ImageTk.PhotoImage(image=tile) for tile in self.img_tiles]
@@ -71,6 +74,20 @@ class SlidingEightPuzzle(tk.Tk):
         self.timer_label.grid(row=self.difficulty, column=0, columnspan=3)
         self.moves_label = tk.Label(self, text="Moves: ")
         self.moves_label.grid(row=self.difficulty + 1, column=0, columnspan=3)
+
+    def reset_game(self):
+        self.stop_timer()
+        for i in range(len(self.starting_state)):
+            self.tiles[i] = self.starting_state[i]
+        self.current_wins = 0
+        self.current_image_index = 0
+        self.moves = 0
+        self.empty_tile_index = self.tiles.index(0)
+        self.img_tiles = procImg.process_image(
+            self.image_files[self.current_image_index],
+            grid_size=(self.difficulty, self.difficulty)
+        )
+        self.init_ui()
 
     def init_timer(self):
         self.elapsed_time = 0
