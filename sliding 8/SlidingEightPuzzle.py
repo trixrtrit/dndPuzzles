@@ -4,6 +4,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import random
 import ProcessImage as procImg
+import ListImages
 
 
 class SlidingEightPuzzle(tk.Tk):
@@ -12,23 +13,35 @@ class SlidingEightPuzzle(tk.Tk):
         self.title("Sliding Eight Puzzle")
         self.difficulty = difficulty
         self.grid_size = difficulty * difficulty
+        self.image_files = ListImages.list_images('./symbols')
+        self.current_image_index = 0
+        self.wins_needed = len(self.image_files)
+        self.current_wins = 0
+        self.grid_frames = []
+        self.geometry("800x800")
+        self.setup_game()
+
+    def setup_game(self):
         self.tiles = [i for i in range(1, self.grid_size)] + [0]
         self.winning_condition = self.tiles[:]
         random.shuffle(self.tiles)
         while not self.is_solvable(self.tiles):
             random.shuffle(self.tiles)
-        self.grid_frames = []
         self.empty_tile_index = self.tiles.index(0)
+        self.img_tiles = procImg.process_image(
+            self.image_files[self.current_image_index],
+            grid_size=(self.difficulty, self.difficulty)
+        )
         self.timer_started = False
         self.start_time = 0
         self.moves = 0
-        self.image_path = 'symbols/owl.png'
-        self.img_tiles = procImg.process_image(self.image_path, grid_size=(self.difficulty, self.difficulty))
-        self.geometry("800x800")
         self.init_ui()
         self.init_timer()
 
     def init_ui(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
         self.tile_frames = []
         self.tile_labels = []
         self.tk_img_tiles = [ImageTk.PhotoImage(image=tile) for tile in self.img_tiles]
@@ -44,7 +57,7 @@ class SlidingEightPuzzle(tk.Tk):
             if self.tiles[i] != 0:
                 label = tk.Label(frame, image=self.tk_img_tiles[self.tiles[i] - 1])
             else:
-                label = tk.Label(frame, background='black')  # Empty tile
+                label = tk.Label(frame, background='black')
             label.grid(sticky="nsew")
             label.bind("<Button-1>", lambda event, tile_pos=i: self.move_tile(tile_pos))
 
@@ -81,6 +94,7 @@ class SlidingEightPuzzle(tk.Tk):
             self.moves_label.config(text="Moves: " + str(self.moves))
 
     def move_tile(self, index):
+        print(index)
         self.start_timer()
         if self.is_valid_move(index):
             self.tiles[self.empty_tile_index], self.tiles[index] = self.tiles[index], self.tiles[self.empty_tile_index]
@@ -105,7 +119,19 @@ class SlidingEightPuzzle(tk.Tk):
         if self.tiles == self.winning_condition:
             self.disable_buttons()
             messagebox.showinfo("Congratulations!", "You've solved the puzzle!")
+            self.current_wins += 1
+            self.current_image_index += 1
             self.stop_timer()
+            self.load_next_image()
+
+    def load_next_image(self):
+        if self.current_wins < self.wins_needed:
+            self.image_path = self.image_files[self.current_image_index]
+            self.setup_game()
+        else:
+            self.stop_timer()
+            self.disable_buttons()
+            messagebox.showinfo("Congratulations!", "You've beat the challenge!")
 
     def disable_buttons(self):
         for button in self.grid_frames:
@@ -138,5 +164,5 @@ class SlidingEightPuzzle(tk.Tk):
 
 
 if __name__ == "__main__":
-    game = SlidingEightPuzzle(difficulty=4)
+    game = SlidingEightPuzzle(difficulty=3)
     game.mainloop()
